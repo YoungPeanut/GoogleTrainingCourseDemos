@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="light_blue">#A8DFF4</color>
+    <color name="light_green">#D3E992</color>
+    <color name="light_red">#FFAFAF</color>
+    <color name="light_yellow">#FFECC0</color>
+
+    <color name="dark_blue">#0099CC</color>
+    <color name="dark_green">#669900</color>
+    <color name="dark_red">#CC0000</color>
+    <color name="dark_yellow">#FF8A00</color>
+
+
+    <color name="grid_state_pressed">#1Affffff</color>
+    <color name="grid_state_focused">#80000000</color>
+
+
+    <color name="holo_blue">#FF33B5E5</color>
+
+
+    <color name="swipe_color_1">#B6DB49</color>
+    <color name="swipe_color_2">#99CC00</color>
+    <color name="swipe_color_3">#8ABD00</color>
+    <color name="swipe_color_4">#7CAF00</color>
+
+
+    <color name="color_scheme_1_1">#33B5E5</color>
+    <color name="color_scheme_1_2">#99CC00</color>
+    <color name="color_scheme_1_3">#FFBB33</color>
+    <color name="color_scheme_1_4">#FF4444</color>
+
+    <color name="color_scheme_2_1">#6DCAEC</color>
+    <color name="color_scheme_2_2">#33B5E5</color>
+    <color name="color_scheme_2_3">#24ADDE</color>
+    <color name="color_scheme_2_4">#16A5D7</color>
+
+    <color name="color_scheme_3_1">#B6DB49</color>
+    <color name="color_scheme_3_2">#99CC00</color>
+    <color name="color_scheme_3_3">#8ABD00</color>
+    <color name="color_scheme_3_4">#7CAF00</color>
+
+
+    <color name="seafoam">#ffc6f9e5</color>
+    <color name="chartreuse">#ffb6e9b5</color>
+    <color name="emerald">#ffa6d9b5</color>
+    <color name="bluegrass">#ff96c9b5</color>
+    <color name="turquoise">#ff86b9b5</color>
+    <color name="slate">#ff76a9b5</color>
+</resources>

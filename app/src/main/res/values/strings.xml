@@ -1,0 +1,320 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">GoogleTrainingCourseDemos</string>
+
+    <!-- lifecycle-->
+    <string name="l_activity_lifecycle">Get started/activity lifecycle</string>
+
+    <string name="lifecycle_method_list">Lifecycle Method List</string>
+    <string name="activity_status">Activity Status</string>
+    <string name="dialog_text">Simple Dialog</string>
+
+    <string name="on_create">onCreate</string>
+    <string name="on_destroy">onDestroy</string>
+    <string name="on_start">onStart</string>
+    <string name="on_restart">onRestart</string>
+    <string name="on_stop">onStop</string>
+    <string name="on_pause">onPause</string>
+    <string name="on_resume">onResume</string>
+
+    <string name="activity_a_label">Activity A</string>
+    <string name="activity_b_label">Activity B</string>
+    <string name="activity_c_label">Activity C</string>
+
+    <string name="btn_start_a_label">Start A</string>
+    <string name="btn_start_b_label">Start B</string>
+    <string name="btn_start_c_label">Start C</string>
+    <string name="btn_start_dialog_label">Dialog</string>
+
+    <string name="btn_finish_a_label">Finish A</string>
+    <string name="btn_finish_b_label">Finish B</string>
+    <string name="btn_finish_c_label">Finish C</string>
+    <string name="btn_finish_dialog_label">Close</string>
+
+    <string name="on_activity_created">onActivityCreated</string>
+    <string name="on_attach">onAttach</string>
+    <string name="on_create_view">onCreateView</string>
+    <string name="on_destroy_view">onDestroyView</string>
+    <string name="on_detach">onDetach</string>
+    <string name="on_view_created">onViewCreated</string>
+    <string name="activity_a">Activity A</string>
+
+    <string name="start_a">Start A</string>
+    <string name="start_b">Start B</string>
+    <string name="start_c">Start C</string>
+
+    <string name="close">Close</string>
+    <string name="dialog">Dialog</string>
+
+    <!-- uifragments-->
+    <string name="l_activity_fragments">Get started/Dynamic UI with Fragments</string>
+
+    <!-- photobyintent-->
+    <string name="l_activity_photobyintent">Building Apps with Multimedia/Capturing Photos</string>
+    <string name="btnIntend">Take (big) Picture</string>
+    <string name="btnIntendS">Take (small) Picture</string>
+    <string name="btnIntendV">Take Video</string>
+    <string name="cannot">Cannot</string>
+    <string name="album_name">CameraSample</string>
+
+    <!-- Bitmaps-->
+    <string name="l_activity_bitmaps">Building Apps with Graphics Animation/Displaying Bitmaps Efficiently</string>
+    <string name="clear_cache_menu">Clear Caches</string>
+    <string name="clear_cache_complete_toast">Caches have been cleared</string>
+    <string name="imageview_description">Image Thumbnail</string>
+    <string name="no_network_connection_toast">No network connection found</string>
+
+    <!-- HelloOpenGLES10-->
+    <string name="l_activity_helloopengles10">Building Apps with Graphics Animation/HelloOpenGLES10</string>
+
+    <!-- HelloOpenGLES20-->
+    <string name="l_activity_helloopengles20">Building Apps with Graphics Animation/HelloOpenGLES20</string>
+
+    <!-- BasicTransition-->
+    <string name="l_activity_basictransition">Building Apps with Graphics Animation/BasicTransition</string>
+
+    <string name="sample_show_log">Show Log</string>
+    <string name="sample_hide_log">Hide Log</string>
+    <string name="scene">Scene</string>
+    <string name="scene_1">1</string>
+    <string name="scene_2">2</string>
+    <string name="scene_3">3</string>
+    <string name="scene_4">4</string>
+    <string name="hello">Hello!</string>
+    <string name="additional_message">This text fades in and out.</string>
+    <string name="intro_message">
+        <![CDATA[
+
+
+	    This sample demonstrates the basic use of the transition framework introduced in KitKat.
+	    Select each of the RadioButtons to switch between the Scenes.
+
+
+        ]]>
+    </string>
+
+    <!-- CustomTransition-->
+    <string name="l_activity_customtransition">Building Apps with Graphics Animation/CustomTransition</string>
+
+    <!-- Animations-->
+    <string name="l_activity_animations">Building Apps with Graphics Animation/Animations</string>
+
+    <!-- Titles -->
+    <string name="title_crossfade">Simple Crossfade</string>
+    <string name="title_card_flip">Card Flip</string>
+    <string name="title_screen_slide">Screen Slide</string>
+    <string name="title_zoom">Zoom</string>
+    <string name="title_layout_changes">Layout Changes</string>
+    <string name="title_template_step">Step <xliff:g id="step_number">%1$d</xliff:g>: Lorem
+        Ipsum</string>
+
+    <!-- Actions -->
+    <string name="action_toggle">Toggle indicator</string>
+    <string name="action_add_item">Add item</string>
+    <string name="action_remove_item">Remove item</string>
+    <string name="action_previous">Previous</string>
+    <string name="action_next">Next</string>
+    <string name="action_finish">Finish</string>
+    <string name="action_info">Photo info</string>
+    <string name="action_photo">View photo</string>
+
+    <!-- Messages -->
+    <string name="message_empty_layout_changes">Add an item above to get started.</string>
+    <string name="message_zoom_touch_expand">Touch a photo to expand it.</string>
+
+    <!-- Accessibility-only descriptions -->
+    <string name="description_image_1">Image 1</string>
+    <string name="description_image_2">Image 2</string>
+    <string name="description_zoom_touch_close">Expanded image (touch to close)</string>
+
+    <!-- Other strings -->
+    <string name="card_back_title">Angry Red Android</string>
+    <string name="card_back_description"><![CDATA[Lorem ipsum dolor sit]]></string>
+    <string name="lorem_ipsum"><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris et magna ut erat elementum cursus in quis ipsum. Nam faucibus ultrices eros, vel tempor leo semper sit amet. Duis magna quam, congue vitae interdum nec, condimentum ut lectus. Sed commodo venenatis eros a dignissim. Nunc adipiscing turpis nec magna venenatis at ultricies ipsum bibendum. Sed volutpat urna quis nisi vulputate egestas. Etiam eu dui a enim lacinia dapibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.\n\nPhasellus orci mi, eleifend nec congue id, volutpat at neque. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Integer semper velit vel leo rutrum sed fermentum elit porta.]]></string>
+
+    <!-- NetworkUsage -->
+    <string name="l_activity_networkusage">Building Apps with Connectivity and the Cloud/NetworkUsage</string>
+
+    <!--  Menu items -->
+    <string name="settings">Settings</string>
+    <string name="refresh">Refresh</string>
+
+    <!--  NetworkActivity -->
+    <string name="page_title">Newest StackOverflow questions tagged \'android\'</string>
+    <string name="updated">Last updated:</string>
+    <string name="lost_connection">Lost connection.</string>
+    <string name="wifi_connected">Wi-Fi reconnected.</string>
+    <string name="connection_error">Unable to load content. Check your network connection.</string>
+    <string name="xml_error">Error parsing XML.</string>
+
+    <!-- BasicSyncAdapter -->
+    <string name="l_activity_basicsyncadapter">Building Apps with Connectivity and the Cloud/BasicSyncAdapter</string>
+    <string name="account_name">FeedSync Service</string>
+    <string name="title_entry_detail">Entry Detail</string>
+    <string name="loading">Waiting for sync...</string>
+    <string name="description_refresh">Refresh</string>
+
+
+    <!-- ContactsList -->
+    <string name="l_activity_contactslist">Building Apps with User Info and Sign-In/Contacts List</string>
+    <string name="activity_contacts_list">Contacts List</string>
+    <string name="activity_contact_detail">Contact Detail</string>
+    <string name="contacts_list_search_results_title">Contacts List Search for \"%s\"</string>
+    <string name="app_description">This is a sample app, demonstrating use of the Android system Contacts Provider.</string>
+    <string name="imageview_description2">Contact Thumbnail</string>
+    <string name="address_button_description">View Address</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_add_contact">Add Contact</string>
+    <string name="menu_edit_contact">Edit Contact</string>
+    <string name="no_contacts">No Contacts Found</string>
+    <string name="no_contact_selected">No Contact Selected</string>
+    <string name="search_hint">Find contacts</string>
+
+    <!-- Used for the AlphabetIndexer in ContactsListFragment to provide quick navigation by
+         alphabet using ListView fast scroll. -->
+    <string name="alphabet">ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+
+    <!-- When using ContactsContract.Contacts#CONTENT_FILTER_URI to search contacts, a match occurs
+         when using a number of different fields, such as name, e-mail address, address, phone
+         number, etc. When a match occurs that is not the name, there is currently no way to tell
+         which other field was matched. This string is displayed in the secondary display text in
+         ContactsListFragment when a search query match occurs that is not the display name.
+         -->
+    <string name="search_match_other">Matches Other Field</string>
+
+    <string name="no_address">No addresses found</string>
+    <string name="no_intent_found">No application found to handle this action</string>
+
+    <!-- EffectiveNavigation -->
+    <string name="l_activity_effectivenavigation"><![CDATA[Best Practices for Interaction & Engagement/Effective Navigation]]></string>
+    <string name="dummy_section_text">Section %1d is just a dummy section.</string>
+    <string name="demo_external_activity">Demo External Activity</string>
+    <string name="demo_collection">Demo Collection</string>
+
+    <!-- PingMe -->
+    <string name="l_activity_pingme"><![CDATA[Best Practices for Interaction & Engagement/Notifying the User]]></string>
+
+    <string name="notification">Ping Notification</string>
+    <!--  Buttons -->
+    <string name="ping">Ping!</string>
+    <string name="snooze">Snooze</string>
+    <string name="dismiss">Dismiss</string>
+
+    <!--  Text Views -->
+
+    <string name="ping_text">Set Seconds Until Ping</string>
+    <string name="done_snoozing">Done Snoozing.</string>
+    <string name="seconds_default">10</string>
+    <string name="reminder_label">Reminder Text</string>
+    <string name="reminder_text">Don\'t forget!</string>
+
+    <!--  Logging -->
+
+    <string name="snoozing">Snoozing!</string>
+    <string name="timer_start">Setting the timer</string>
+    <string name="sleep_error">Sleep failure</string>
+    <string name="timer_finished">Timer finished.</string>
+
+
+    <!-- SwipeRefreshLayoutBasic -->
+    <string name="l_activity_swiperefreshlayoutbasic"><![CDATA[Best Practices for Interaction & Engagement/SwipeRefreshLayoutBasic]]></string>
+    <!-- SwipeRefreshListFragment -->
+    <string name="l_activity_swiperefreshlistfragment"><![CDATA[Best Practices for Interaction & Engagement/SwipeRefreshListFragment]]></string>
+
+    <string name="menu_refresh">Refresh</string>
+
+    <string name="menu_color_scheme">Color scheme</string>
+    <string name="menu_color_scheme_1">Scheme #1</string>
+    <string name="menu_color_scheme_2">Scheme #2</string>
+    <string name="menu_color_scheme_3">Scheme #3</string>
+
+    <!-- SwipeRefreshMultipleViews -->
+    <string name="l_activity_swiperefreshmultipleviews"><![CDATA[Best Practices for Interaction & Engagement/SwipeRefreshMultipleViews]]></string>
+
+    <string name="menu_clear">Clear items</string>
+    <string name="empty_text">List is empty! Swipe down to refresh.</string>
+
+    <!-- customview -->
+    <string name="l_activity_customview">Best Practices for User Interface/customview</string>
+    <string name="reset_button">Reset</string>
+
+    <!-- TabCompat -->
+    <string name="l_activity_tabcompat">Best Practices for User Interface/Creating Backward-Compatible UIs</string>
+    <string name="tab_photos">Photos</string>
+    <string name="tab_videos">Videos</string>
+
+    <!-- ImmersiveMode -->
+    <string name="l_activity_immersivemode">Best Practices for User Interface/ImmersiveMode</string>
+    <string name="sample_action">Toggle immersive mode!</string>
+
+    <string name="intro_message2">
+        <![CDATA[
+
+
+            \n\n\n\"Immersive Mode\", added in Android 4.4, improves the \"hide full screen\" and
+            \"hide nav bar\" modes, by letting users swipe the bars in and out.  This sample
+            lets the user experiment with immersive mode by seeing how it interacts
+            with some of the other UI flags related to full-screen apps.
+
+
+        ]]>
+    </string>
+
+    <!-- BasicImmersiveMode -->
+    <string name="l_activity_basicimmersivemode">Best Practices for User Interface/BasicImmersiveMode</string>
+
+    <!-- AdvancedImmersiveMode -->
+    <string name="l_activity_advancedimmersivemode">Best Practices for User Interface/AdvancedImmersiveMode</string>
+
+
+    <!-- interactivechart -->
+    <string name="l_activity_interactivechart">Best Practices for User Input/Using Touch Gestures</string>
+    <string name="action_zoom_in">Demo zoom in</string>
+    <string name="action_zoom_out">Demo zoom out</string>
+    <string name="action_pan_left">Demo pan left</string>
+    <string name="action_pan_right">Demo pan right</string>
+    <string name="action_pan_up">Demo pan up</string>
+    <string name="action_pan_down">Demo pan down</string>
+
+    <!-- controllersample -->
+    <string name="l_activity_controllersample">Best Practices for User Input/Supporting Game Controllers</string>
+
+    <string name="game_controller_input_description">
+        This activity demonstrates how to process input events received from
+        game controllers.  Please connect your game controller now and try
+        moving the joysticks or pressing buttons.  If it helps, try to imagine
+        that you are a lone space cowboy in hot pursuit of the aliens who kidnapped
+        your favorite llama on their way back to Andromeda&#8230;
+    </string>
+
+    <!-- ThreadSample -->
+    <string name="l_activity_threadsample">Best Practices for Background Jobs/Running in a Background Service</string>
+    <string name="authority">com.example.android.threadsample</string>
+    <string name="activity_title">Picasa Images</string>
+    <string name="progress_starting_update">Starting Update</string>
+    <string name="progress_connecting">Connecting</string>
+    <string name="progress_parsing">Parsing</string>
+    <string name="progress_writing">Writing to Database</string>
+    <string name="no_connection">In offline mode, and no stored data is available.</string>
+    <string name="alert_description">Alert!</string>
+    <string name="offline_mode">In offline mode. Stored data is shown.</string>
+
+    <!--Scheduler-->
+    <string name="l_activity_scheduler">Best Practices for Background Jobs/Managing Device Awake State</string>
+
+    <string name="intro_message3">Welcome to <b>Scheduler</b>!
+        This sample demonstrates how you can schedule an alarm that causes a service to
+        be started. This is useful when you want to schedule alarms that initiate
+        long-running operations. Click START ALARM to activate an alarm to check
+        the Google home page for a custom doodle once a day. If the app finds a doodle,
+        it posts a \"Doodle Alert\" as a notification. Click CANCEL ALARM to cancel the
+        alarm. Once the alarm is active, it automatically restarts when the device is
+        rebooted.</string>
+    <string name="start_text">Start Alarm</string>
+    <string name="cancel_text">Cancel Alarm</string>
+    <string name="doodle_alert">Doodle Alert</string>
+    <string name="doodle_found">There is a Google doodle today!!</string>
+    <string name="no_doodle">No Google doodle today.</string>
+
+
+
+</resources>

@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="info.ipeanut.googletrainingcoursedemos">
+
+    <!--photobyintent-->
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!--Bitmaps-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+
+    <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <!-- Required to enable our SyncAdapter after it's created. -->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <!-- Required because we're manually creating a new account. -->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+
+    <!-- ContactsList -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <!-- PingMe -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--Scheduler-->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Tell the system this app requires OpenGL ES 1.0 or higher-->
+    <uses-feature android:glEsVersion="0x00010000" />
+    <!-- Tell the system this app requires OpenGL ES 2.0. -->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+        <!--android:theme="@style/AppTheme"-->
+
+        <activity android:name=".CourseDemoActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--lifecycle-->
+        <activity
+            android:name=".lifecycle.ActivityA"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_lifecycle"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".lifecycle.ActivityB" />
+
+        <activity android:name=".lifecycle.ActivityC" />
+
+        <activity
+            android:name=".lifecycle.DialogActivity"
+            android:theme="@android:style/Theme.Dialog"></activity>
+
+        <!--uifragments-->
+        <activity
+            android:name=".uifragments.MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_fragments">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <!--photobyintent-->
+        <activity
+            android:name=".photobyintent.PhotoIntentActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_photobyintent">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <!--Bitmaps-->
+        <activity
+            android:name=".displayingbitmaps.ui.ImageGridActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_bitmaps">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".displayingbitmaps.ui.ImageDetailActivity"
+            android:label="ImageDetailActivity"
+            android:parentActivityName=".displayingbitmaps.ui.ImageGridActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".displayingbitmaps.ui.ImageGridActivity" />
+        </activity>
+
+        <!--HelloOpenGLES10-->
+        <activity
+            android:name=".opengl10.OpenGLES10Activity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_helloopengles10">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <!--HelloOpenGLES20-->
+        <activity
+            android:name=".opengl20.OpenGLES20Activity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_helloopengles20">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <!--BasicTransition-->
+        <activity
+            android:name=".basictransition.MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_basictransition">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <!--CustomTransition-->
+        <activity
+            android:name=".customtransition.MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/l_activity_customtransition">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+
+            </intent-filter>
+        </activity>
+
+        <!--Animations-->
+        <activity
+            android:name=".animationsdemo.MainActivity"
+            android:label="@string/l_activity_animations">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".animationsdemo.CrossfadeActivity"
+            android:label="@string/title_crossfade"
+            android:parentActivityName=".animationsdemo.MainActivity"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".animationsdemo.MainActivity" />
+        </activity>
+
+        <!--android:theme="@style/DarkTheme"-->
+        <activity
+            android:name=".animationsdemo.CardFlipActivity"
+            android:label="@string/title_card_flip"
+            android:parentActivityName=".animationsdemo.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".animationsdemo.MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".animationsdemo.ScreenSlideActivity"
+            android:label="@string/title_screen_slide"
+            android:parentActivityName=".animationsdemo.MainActivity"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".animationsdemo.MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".animationsdemo.ZoomActivity"
+            android:label="@string/title_zoom"
+            android:parentActivityName=".animationsdemo.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".animationsdemo.MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".animationsdemo.LayoutChangesActivity"
+            android:label="@string/title_layout_changes"
+            android:parentActivityName=".animationsdemo.MainActivity">>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".animationsdemo.MainActivity" />
+        </activity>
+
+        <!--NetworkUsage-->
+        <activity
+            android:name=".networkusage.NetworkActivity"
+            android:label="@string/l_activity_networkusage">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".networkusage.SettingsActivity"
+            android:label="SettingsActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+
+        <!--BasicSyncAdapter-->
+        <activity
+            android:name=".basicsyncadapter.EntryListActivity"
+            android:label="@string/l_activity_basicsyncadapter">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- ContentProvider to store feed data.
+
+        The "authorities" here are defined as part of a ContentProvider interface. It's used here
+        as an attachment point for the SyncAdapter. See res/xml/syncadapter.xml and
+        SyncService.java.
+
+        Since this ContentProvider is not exported, it will not be accessible outside of this app's
+        package. -->
+        <provider
+            android:name=".basicsyncadapter.provider.FeedProvider"
+            android:authorities="com.example.android.network.sync.basicsyncadapter"
+            android:exported="false" />
+
+        <!-- This service implements our SyncAdapter. It needs to be exported, so that the system
+        sync framework can access it. -->
+        <service
+            android:name=".basicsyncadapter.SyncService"
+            android:exported="true">
+            <!-- This intent filter is required. It allows the system to launch our sync service
+            as needed. -->
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <!-- This points to a required XML file which describes our SyncAdapter. -->
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <!-- This implements the account we'll use as an attachment point for our SyncAdapter. Since
+        our SyncAdapter doesn't need to authenticate the current user (it just fetches a public RSS
+        feed), this account's implementation is largely empty.
+
+        It's also possible to attach a SyncAdapter to an existing account provided by another
+        package. In that case, this element could be omitted here. -->
+        <service android:name=".basicsyncadapter.accounts.GenericAccountService">
+            <!-- Required filter used by the system to launch our account service. -->
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <!-- This points to an XMLf ile which describes our account service. -->
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+
+        <!-- ContactsList -->
+
+        <!-- When the soft keyboard is showing the views of this activity should be resized in the
+             remaining space so that inline searching can take place without having to dismiss the
+             keyboard to see all the content. Therefore windowSoftInputMode is set to
+             adjustResize. -->
+        <activity
+            android:name="contactslist.ui.ContactsListActivity"
+            android:label="@string/l_activity_contactslist"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+            <!-- Add intent-filter for search intent action and specify searchable configuration
+                 via meta-data tag. This allows this activity to receive search intents via the
+                 system hooks. In this sample this is only used on older OS versions (pre-Honeycomb)
+                 via the activity search dialog. See the Search API guide for more information:
+                 http://developer.android.com/guide/topics/search/search-dialog.html -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable_contacts" />
+        </activity>
+        <activity
+            android:name="contactslist.ui.ContactDetailActivity"
+            android:label="@string/activity_contact_detail"
+            android:parentActivityName="contactslist.ui.ContactsListActivity">
+            <!-- Define hierarchical parent of this activity, both via the system
+                 parentActivityName attribute (added in API Level 16) and via meta-data annotation.
+                 This allows use of the support library NavUtils class in a way that works over
+                 all Android versions. See the "Tasks and Back Stack" guide for more information:
+                 http://developer.android.com/guide/components/tasks-and-back-stack.html
+            -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="contactslist.ui.ContactsListActivity" />
+        </activity>
+
+        <!-- EffectiveNavigation -->
+        <activity
+            android:name=".effectivenavigation.MainActivity"
+            android:label="@string/l_activity_effectivenavigation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".effectivenavigation.CollectionDemoActivity"
+            android:label="@string/demo_collection" />
+
+        <!-- PingMe -->
+        <activity
+            android:name=".pingme.MainActivity"
+            android:label="@string/l_activity_pingme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name=".pingme.PingService"
+            android:enabled="true"
+            android:label="PingServiceLabel"></service>
+        <activity
+            android:name=".pingme.ResultActivity"
+            android:excludeFromRecents="true"
+            android:label="Take Action"
+            android:launchMode="singleTask"
+            android:taskAffinity="" />
+
+        <!-- SwipeRefreshLayoutBasic -->
+        <activity
+            android:name=".swiperefreshlayoutbasic.MainActivity"
+            android:label="@string/l_activity_swiperefreshlayoutbasic">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- SwipeRefreshListFragment -->
+        <activity
+            android:name=".swiperefreshlistfragment.MainActivity"
+            android:label="@string/l_activity_swiperefreshlistfragment">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- SwipeRefreshMultipleViews -->
+        <activity
+            android:name=".swiperefreshmultipleviews.MainActivity"
+            android:label="@string/l_activity_swiperefreshmultipleviews">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- custom-view -->
+        <activity
+            android:name=".customviews.MainActivity"
+            android:label="@string/l_activity_customview">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- tabcompat -->
+        <activity
+            android:name=".tabcompat.MainActivity"
+            android:label="@string/l_activity_tabcompat">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- ImmersiveMode -->
+        <activity
+            android:name=".immersivemode.MainActivity"
+            android:label="@string/l_activity_immersivemode"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- BasicImmersiveMode -->
+        <activity
+            android:name=".basicimmersivemode.MainActivity"
+            android:label="@string/l_activity_basicimmersivemode"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- AdvancedImmersiveMode -->
+        <activity
+            android:name=".advancedimmersivemode.MainActivity"
+            android:label="@string/l_activity_advancedimmersivemode"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- interactivechart -->
+        <activity
+            android:name=".interactivechart.MainActivity"
+            android:label="@string/l_activity_interactivechart">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- controllersample -->
+        <activity
+            android:name=".controllersample.GameViewActivity"
+            android:label="@string/l_activity_controllersample">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!-- ThreadSample -->
+        <activity
+            android:name=".threadsample.DisplayActivity"
+            android:label="@string/l_activity_threadsample">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            No intent filters are specified, so android:exported defaults to "false". The
+            service is only available to this app.
+        -->
+        <service
+            android:name=".threadsample.RSSPullService"
+            android:exported="false" />
+
+        <!--
+            The attribute "android:exported" must be set to "false" to restrict this content
+            provider to its own app. Otherwise, all apps could access it.
+         -->
+        <provider
+            android:name=".threadsample.DataProvider"
+            android:authorities="@string/authority"
+            android:exported="false" />
+
+        <!--Scheduler-->
+        <activity
+            android:name=".scheduler.MainActivity"
+            android:label="@string/l_activity_scheduler">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="info.ipeanut.googletrainingcoursedemos.activities" />
+            </intent-filter>
+        </activity>
+
+        <receiver android:name=".scheduler.SampleAlarmReceiver" />
+
+        <receiver
+            android:name=".scheduler.SampleBootReceiver"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".scheduler.SampleSchedulingService" />
+
+
+    </application>
+
+</manifest>

@@ -1,0 +1,46 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+
+    <dimen name="font_large">44dp</dimen>
+    <dimen name="font_medium">24dp</dimen>
+    <dimen name="font_small">10dp</dimen>
+
+
+    <dimen name="image_thumbnail_size">100dp</dimen>
+    <dimen name="image_thumbnail_spacing">1dp</dimen>
+
+
+    <dimen name="margin_tiny">4dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">32dp</dimen>
+    <dimen name="margin_huge">64dp</dimen>
+
+    <!-- Semantic definitions -->
+
+    <dimen name="horizontal_page_margin">@dimen/margin_medium</dimen>
+    <dimen name="vertical_page_margin">@dimen/margin_medium</dimen>
+
+    <dimen name="square_size_normal">50dp</dimen>
+    <dimen name="square_size_expanded">100dp</dimen>
+
+
+    <dimen name="action_button_min_width">56dp</dimen>
+    <dimen name="indeterminate_progress_size">32dp</dimen>
+
+
+    <dimen name="padding">16dp</dimen>
+    <dimen name="listview_item_padding">16dp</dimen>
+
+    <dimen name="chart_padding">16dp</dimen>
+    <dimen name="min_chart_size">100dp</dimen>
+
+
+    <dimen name="thumbSize">160.0dip</dimen>
+
+
+
+</resources>
