@@ -182,6 +182,617 @@ public class PieChart extends ViewGroup {
     }
 
     /**
+     * Initialize the control. This code is in a separate method so that it can be
+     * called from both constructors.
+     */
+    private void init() {
+        // Force the background to software rendering because otherwise the Blur
+        // filter won't work.
+        setLayerToSW(this);
+
+        // Set up the paint for the label text
+        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setColor(mTextColor);
+        if (mTextHeight == 0) {
+            mTextHeight = mTextPaint.getTextSize();
+        } else {
+            mTextPaint.setTextSize(mTextHeight);
+        }
+
+        // Set up the paint for the pie slices
+        mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPiePaint.setStyle(Paint.Style.FILL);
+        mPiePaint.setTextSize(mTextHeight);
+
+        // Set up the paint for the shadow
+        mShadowPaint = new Paint(0);// TODO: 16/9/8 0是个什么鬼。。。
+        mShadowPaint.setColor(0xff101010);
+        mShadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));//边缘模糊马赛克，8是半径
+
+        // Add a child view to draw the pie. Putting this in a child view
+        // makes it possible to draw it on a separate hardware layer that rotates
+        // independently
+        mPieView = new PieView(getContext());
+        addView(mPieView);
+        mPieView.rotateTo(mPieRotation);// hardware layer  独立旋转
+
+        // The pointer doesn't need hardware acceleration, but in order to show up
+        // in front of the pie it also needs to be on a separate view.
+        mPointerView = new PointerView(getContext());
+        addView(mPointerView);// pie上面的单独view
+
+        // Set up an animator to animate the PieRotation property. This is used to
+        // correct the pie's orientation after the user lets go of it.
+        if (Build.VERSION.SDK_INT >= 11) {
+            mAutoCenterAnimator = ObjectAnimator.ofInt(PieChart.this, "PieRotation", 0);//交互结束，view自己玩自己的动画
+
+            // Add a listener to hook the onAnimationEnd event so that we can do
+            // some cleanup when the pie stops moving.
+            mAutoCenterAnimator.addListener(new Animator.AnimatorListener() {
+                public void onAnimationStart(Animator animator) {
+                }
+
+                public void onAnimationEnd(Animator animator) {
+                    mPieView.decelerate();
+                }
+
+                public void onAnimationCancel(Animator animator) {
+                }
+
+                public void onAnimationRepeat(Animator animator) {
+                }
+            });
+        }
+
+        // Create a Scroller to handle the fling gesture.
+        if (Build.VERSION.SDK_INT < 11) {
+            mScroller = new Scroller(getContext());//尼玛，不是推荐OverScroller
+        } else {
+            //第二个参数 插值器 默认viscous黏性。。true表示fling的时候开启flywheel惯性轮
+            mScroller = new Scroller(getContext(), null, true);
+        }
+        // The scroller doesn't have any built-in animation functions--it just supplies
+        // values when we ask it to. So we have to have a way to call it every frame
+        // until the fling ends. This code (ab)uses a ValueAnimator object to generate
+        // a callback on every animation frame. We don't use the animated value at all.
+        /**
+         * 方式一：借助ValueAnimator
+         * 1 mScroller 初始化
+         * 2 fling手势触发：调用mScroller.fling() 赋予起始值和速度，并触发Start scrolling。（其他触发开始的方法：startScroll() ）
+         * 3 说是触发Start，其实只是赋予状态值。还需借助ValueAnimator，手势同时触发动画开始，
+         * 4 监听动画，不断调用mScroller.computeScrollOffset() 和 mScroller.getScrollY，才有过程值。
+         *
+         * 方式二：借助view的draw()，它调了computeScroll()
+         * 1 mScroller 初始化
+         * 2 松手触发: mScroller.startScroll(0, getScrollY(), 0, dy); ＋ invalidate();
+         * 3 这样触发了view的draw()，它调了computeScroll()，所以重写computeScroll()，
+         * 4 怎么重写：
+         *      if (mScroller.computeScrollOffset()){ //调一下computeScrollOffset才能拿到新的过程值
+         *          int scrollY = mScroller.getCurrY(); ＋ postInvalidate();}
+         * 5 这样触发draw，回到3，
+         *
+         */
+        if (Build.VERSION.SDK_INT >= 11) {
+            mScrollAnimator = ValueAnimator.ofFloat(0, 1);
+            mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    tickScrollAnimation();
+                }
+            });
+        }
+
+        // Create a gesture detector to handle onTouch messages
+        mDetector = new GestureDetector(PieChart.this.getContext(), new GestureListener());
+
+        // Turn off long press--this control doesn't use it, and if long press is enabled,
+        // you can't scroll for a bit, pause, then scroll some more (the pause is interpreted
+        // as a long press, apparently)
+        mDetector.setIsLongpressEnabled(false);
+
+        // In edit mode it's nice to have some demo data, so add that here.
+        if (this.isInEditMode()) {
+            Resources res = getResources();
+            addItem("Annabelle", 3, res.getColor(R.color.bluegrass));
+            addItem("Brunhilde", 4, res.getColor(R.color.chartreuse));
+            addItem("Carolina", 2, res.getColor(R.color.emerald));
+            addItem("Dahlia", 3, res.getColor(R.color.seafoam));
+            addItem("Ekaterina", 1, res.getColor(R.color.slate));
+        }
+
+    }
+
+
+    // Measurement functions. This example uses a simple heuristic: it assumes that
+    // the pie chart should be at least as wide as its label.
+    //
+    @Override
+    protected int getSuggestedMinimumWidth() {
+        return (int) mTextWidth * 2;
+    }
+
+    @Override
+    protected int getSuggestedMinimumHeight() {
+        return (int) mTextWidth;
+    }
+
+    /**
+     * 1 一套标准的测量流程，比较Suggested值和回调参数值
+     * 2 另一套标准是，单独处理warp_content，其他按参数走
+     */
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // Try for a width based on our minimum
+        int minw = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
+        int w = Math.max(minw, MeasureSpec.getSize(widthMeasureSpec));
+
+        // Whatever the width ends up being, ask for a height that would let the pie
+        // get as big as it can
+        int minh = (w - (int) mTextWidth) + getPaddingBottom() + getPaddingTop();//基本上就是宽度啊
+        int h = Math.min(MeasureSpec.getSize(heightMeasureSpec), minh);
+
+        setMeasuredDimension(w, h);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        // Do nothing. Do not call the superclass method--that would start a layout pass
+        // on this view's children. PieChart lays out its children in onSizeChanged().
+        //会触发子View的 layout 过程
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        //
+        // Set dimensions for text, pie chart, etc
+        //
+        // Account for padding
+        float xpad = (float) (getPaddingLeft() + getPaddingRight());
+        float ypad = (float) (getPaddingTop() + getPaddingBottom());
+
+        // Account for the label
+        if (mShowText) xpad += mTextWidth;
+
+        float ww = (float) w - xpad;
+        float hh = (float) h - ypad;
+
+        // Figure out how big we can make the pie.
+        float diameter = Math.min(ww, hh);
+        mPieBounds = new RectF(
+                0.0f,
+                0.0f,
+                diameter,
+                diameter);
+        mPieBounds.offsetTo(getPaddingLeft(), getPaddingTop());
+
+        mPointerY = mTextY - (mTextHeight / 2.0f);
+        float pointerOffset = mPieBounds.centerY() - mPointerY;
+
+        // Make adjustments based on text position
+        if (mTextPos == TEXTPOS_LEFT) {
+            mTextPaint.setTextAlign(Paint.Align.RIGHT);
+            if (mShowText) mPieBounds.offset(mTextWidth, 0.0f);
+            mTextX = mPieBounds.left;
+
+            if (pointerOffset < 0) {
+                pointerOffset = -pointerOffset;
+                mCurrentItemAngle = 225;
+            } else {
+                mCurrentItemAngle = 135;
+            }
+            mPointerX = mPieBounds.centerX() - pointerOffset;
+        } else {
+            mTextPaint.setTextAlign(Paint.Align.LEFT);
+            mTextX = mPieBounds.right;
+
+            if (pointerOffset < 0) {
+                pointerOffset = -pointerOffset;
+                mCurrentItemAngle = 315;
+            } else {
+                mCurrentItemAngle = 45;
+            }
+            mPointerX = mPieBounds.centerX() + pointerOffset;
+        }
+
+        mShadowBounds = new RectF(
+                mPieBounds.left + 10,
+                mPieBounds.bottom + 10,
+                mPieBounds.right - 10,
+                mPieBounds.bottom + 20);
+
+        // Lay out the child view that actually draws the pie.
+        mPieView.layout((int) mPieBounds.left,
+                (int) mPieBounds.top,
+                (int) mPieBounds.right,
+                (int) mPieBounds.bottom);
+        mPieView.setPivot(mPieBounds.width() / 2, mPieBounds.height() / 2);
+
+        mPointerView.layout(0, 0, w, h);
+        onDataChanged();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        // Draw the shadow
+        canvas.drawOval(mShadowBounds, mShadowPaint);
+
+        // Draw the label text
+        if (getShowText()) {
+            canvas.drawText(mData.get(mCurrentItem).mLabel, mTextX, mTextY, mTextPaint);
+        }
+
+        // If the API level is less than 11, we can't rely on the view animation system to
+        // do the scrolling animation. Need to tick it here and call postInvalidate() until the scrolling is done.
+        if (Build.VERSION.SDK_INT < 11) {
+            tickScrollAnimation();
+            if (!mScroller.isFinished()) {
+                postInvalidate();
+            }
+        }
+    }
+
+    /**
+     * Do all of the recalculations needed when the data array changes.
+     */
+    private void onDataChanged() {
+        // When the data changes, we have to recalculate
+        // all of the angles.
+        int currentAngle = 0;
+        for (Item it : mData) {
+            it.mStartAngle = currentAngle;
+            it.mEndAngle = (int) ((float) currentAngle + it.mValue * 360.0f / mTotal);
+            currentAngle = it.mEndAngle;
+
+
+            // Recalculate the gradient shaders. There are
+            // three values in this gradient, even though only
+            // two are necessary, in order to work around
+            // a bug in certain versions of the graphics engine
+            // that expects at least three values if the
+            // positions array is non-null.
+            /**
+             * public SweepGradient (float cx, float cy, int[] colors, float[] positions)
+             *                      渐变的中心点坐标    ／  中点向外分发的颜色／颜色所在的相对位置
+             */
+            it.mShader = new SweepGradient(
+                    mPieBounds.width() / 2.0f,
+                    mPieBounds.height() / 2.0f,
+                    new int[]{
+                            it.mHighlight,
+                            it.mHighlight,
+                            it.mColor,
+                            it.mColor,
+                    },
+                    new float[]{
+                            0,
+                            (float) (360 - it.mEndAngle) / 360.0f,
+                            (float) (360 - it.mStartAngle) / 360.0f,
+                            1.0f
+                    }
+            );
+        }
+        calcCurrentItem();
+        onScrollFinished();
+    }
+
+    /**
+     * Calculate which pie slice is under the pointer, and set the current item
+     * field accordingly.
+     */
+    private void calcCurrentItem() {
+        int pointerAngle = (mCurrentItemAngle + 360 + mPieRotation) % 360;
+        for (int i = 0; i < mData.size(); ++i) {
+            Item it = mData.get(i);
+            if (it.mStartAngle <= pointerAngle && pointerAngle <= it.mEndAngle) {
+                if (i != mCurrentItem) {
+                    setCurrentItem(i, false);
+                }
+                break;
+            }
+        }
+    }
+
+    private void tickScrollAnimation() {
+        if (!mScroller.isFinished()) {
+            mScroller.computeScrollOffset();//Call this when you want to know the new location
+            setPieRotation(mScroller.getCurrY());
+        } else {
+            if (Build.VERSION.SDK_INT >= 11) {
+                mScrollAnimator.cancel();
+            }
+            onScrollFinished();
+        }
+    }
+
+    private void setLayerToSW(View v) {
+        if (!v.isInEditMode() && Build.VERSION.SDK_INT >= 11) {
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
+    }
+
+    private void setLayerToHW(View v) {
+        if (!v.isInEditMode() && Build.VERSION.SDK_INT >= 11) {
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
+    }
+
+    /**
+     * Force a stop to all pie motion. Called when the user taps during a fling.
+     */
+    private void stopScrolling() {
+        mScroller.forceFinished(true);
+        if (Build.VERSION.SDK_INT >= 11) {
+            mAutoCenterAnimator.cancel();
+        }
+
+        onScrollFinished();
+    }
+
+    /**
+     * Called when the user finishes a scroll action.
+     */
+    private void onScrollFinished() {
+        if (mAutoCenterInSlice) {
+            centerOnCurrentItem();
+        } else {
+            mPieView.decelerate();
+        }
+    }
+
+    /**
+     * Kicks off an animation that will result in the pointer being centered in the
+     * pie slice of the currently selected item.
+     */
+    private void centerOnCurrentItem() {
+        Item current = mData.get(getCurrentItem());
+        int targetAngle = current.mStartAngle + (current.mEndAngle - current.mStartAngle) / 2;
+        targetAngle -= mCurrentItemAngle;
+        if (targetAngle < 90 && mPieRotation > 180) targetAngle += 360;
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            // Fancy animated version
+            mAutoCenterAnimator.setIntValues(targetAngle);
+            mAutoCenterAnimator.setDuration(AUTOCENTER_ANIM_DURATION).start();
+        } else {
+            // Dull non-animated version
+            //mPieView.rotateTo(targetAngle);
+        }
+    }
+
+    /**********************************触摸交互**************************************************/
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // Let the GestureDetector interpret this event
+        boolean result = mDetector.onTouchEvent(event);
+
+        // If the GestureDetector doesn't want this event, do some custom processing.
+        // This code just tries to detect when the user is done scrolling by looking
+        // for ACTION_UP events.
+        if (!result) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // User is done scrolling, it's now safe to do things like autocenter
+                stopScrolling();
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Extends {@link GestureDetector.SimpleOnGestureListener} to provide custom gesture
+     * processing.
+     */
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            // Set the pie rotation directly.
+            float scrollTheta = vectorToScalarScroll(
+                    distanceX,
+                    distanceY,
+                    e2.getX() - mPieBounds.centerX(),
+                    e2.getY() - mPieBounds.centerY());
+            setPieRotation(getPieRotation() - (int) scrollTheta / FLING_VELOCITY_DOWNSCALE);
+            return true;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            // Set up the Scroller for a fling
+            float scrollTheta = vectorToScalarScroll(
+                    velocityX,
+                    velocityY,
+                    e2.getX() - mPieBounds.centerX(),
+                    e2.getY() - mPieBounds.centerY());
+            mScroller.fling(
+                    0,
+                    (int) getPieRotation(),
+                    0,
+                    (int) scrollTheta / FLING_VELOCITY_DOWNSCALE,
+                    0,
+                    0,
+                    Integer.MIN_VALUE,
+                    Integer.MAX_VALUE);
+
+            // Start the animator and tell it to animate for the expected duration of the fling.
+            if (Build.VERSION.SDK_INT >= 11) {
+                mScrollAnimator.setDuration(mScroller.getDuration());
+                mScrollAnimator.start();
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            // The user is interacting with the pie, so we want to turn on acceleration
+            // so that the interaction is smooth.
+            mPieView.accelerate();
+            if (isAnimationRunning()) {
+                stopScrolling();
+            }
+            return true;
+        }
+    }
+
+    private boolean isAnimationRunning() {
+        return !mScroller.isFinished() || (Build.VERSION.SDK_INT >= 11 && mAutoCenterAnimator.isRunning());
+    }
+
+    /**
+     * Helper method for translating (x,y) scroll vectors into scalar rotation of the pie.
+     *
+     * @param dx The x component of the current scroll vector.
+     * @param dy The y component of the current scroll vector.
+     * @param x  The x position of the current touch, relative to the pie center.
+     * @param y  The y position of the current touch, relative to the pie center.
+     * @return The scalar representing the change in angular position for this scroll.
+     */
+    private static float vectorToScalarScroll(float dx, float dy, float x, float y) {
+        // get the length of the vector
+        float l = (float) Math.sqrt(dx * dx + dy * dy);
+
+        // decide if the scalar should be negative or positive by finding
+        // the dot product of the vector perpendicular to (x,y).
+        float crossX = -y;
+        float crossY = x;
+
+        float dot = (crossX * dx + crossY * dy);
+        float sign = Math.signum(dot);
+
+        return l * sign;
+    }
+
+    /**********************************面向对象产生的对象类**************************************************/
+
+    /**
+     * Internal child class that draws the pie chart onto a separate hardware layer
+     * when necessary.
+     */
+    private class PieView extends View {
+        // Used for SDK < 11
+        private float mRotation = 0;
+        private Matrix mTransform = new Matrix();
+        private PointF mPivot = new PointF();
+
+        /**
+         * Construct a PieView
+         *
+         * @param context
+         */
+        public PieView(Context context) {
+            super(context);
+        }
+
+        /**
+         * Enable hardware acceleration (consumes memory)
+         */
+        public void accelerate() {
+            setLayerToHW(this);
+        }
+
+        /**
+         * Disable hardware acceleration (releases memory)
+         */
+        public void decelerate() {
+            setLayerToSW(this);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            // 为了SDK_INT < 11的旋转，rotateTo
+            // 通过 Matrix 操作 canvas
+            if (Build.VERSION.SDK_INT < 11) {
+                mTransform.set(canvas.getMatrix());
+                mTransform.preRotate(mRotation, mPivot.x, mPivot.y);
+                canvas.setMatrix(mTransform);
+            }
+
+            for (Item it : mData) {
+                mPiePaint.setShader(it.mShader);//颜色渐变的着色器
+                canvas.drawArc(mBounds,
+                        360 - it.mEndAngle,//0度是钟表3点方向，起始角度默认顺时针，被360减，说明它是逆时针画的，
+                        it.mEndAngle - it.mStartAngle,
+                        true, //true表示 弧线与圆点连接闭合
+                        mPiePaint);//mPiePaint 是填充的
+            }
+        }
+
+        /**
+         * 这是一个神奇的回调方法啊，这样就拿到了mBounds，。。。太便宜了
+         */
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            mBounds = new RectF(0, 0, w, h);
+        }
+
+        RectF mBounds;
+
+        public void rotateTo(float pieRotation) {
+            mRotation = pieRotation;
+            if (Build.VERSION.SDK_INT >= 11) {
+                setRotation(pieRotation);
+            } else {
+                invalidate();
+            }
+        }
+
+        public void setPivot(float x, float y) {
+            mPivot.x = x;
+            mPivot.y = y;
+            if (Build.VERSION.SDK_INT >= 11) {
+                setPivotX(x);
+                setPivotY(y);
+            } else {
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * View that draws the pointer on top of the pie chart
+     */
+    private class PointerView extends View {
+
+        /**
+         * Construct a PointerView object
+         *
+         * @param context
+         */
+        public PointerView(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            canvas.drawLine(mTextX, mPointerY, mPointerX, mPointerY, mTextPaint);
+            canvas.drawCircle(mPointerX, mPointerY, mPointerRadius, mTextPaint);
+        }
+    }
+
+    /**
+     * Maintains the state for a data item.
+     */
+    private class Item {
+        public String mLabel;
+        public float mValue;
+        public int mColor;
+
+        // computed values
+        public int mStartAngle;
+        public int mEndAngle;
+
+        public int mHighlight;
+        public Shader mShader;
+    }
+
+    /**********************************对外**************************************************/
+
+    /**
      * Returns true if the text label should be visible.
      *
      * @return True if the text label should be visible, false otherwise.
@@ -440,586 +1051,5 @@ public class PieChart extends ViewGroup {
 
         return mData.size() - 1;
     }
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // Let the GestureDetector interpret this event
-        boolean result = mDetector.onTouchEvent(event);
-
-        // If the GestureDetector doesn't want this event, do some custom processing.
-        // This code just tries to detect when the user is done scrolling by looking
-        // for ACTION_UP events.
-        if (!result) {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                // User is done scrolling, it's now safe to do things like autocenter
-                stopScrolling();
-                result = true;
-            }
-        }
-        return result;
-    }
-
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        // Do nothing. Do not call the superclass method--that would start a layout pass
-        // on this view's children. PieChart lays out its children in onSizeChanged().
-    }
-
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        // Draw the shadow
-        canvas.drawOval(mShadowBounds, mShadowPaint);
-
-        // Draw the label text
-        if (getShowText()) {
-            canvas.drawText(mData.get(mCurrentItem).mLabel, mTextX, mTextY, mTextPaint);
-        }
-
-        // If the API level is less than 11, we can't rely on the view animation system to
-        // do the scrolling animation. Need to tick it here and call postInvalidate() until the scrolling is done.
-        if (Build.VERSION.SDK_INT < 11) {
-            tickScrollAnimation();
-            if (!mScroller.isFinished()) {
-                postInvalidate();
-            }
-        }
-    }
-
-
-    //
-    // Measurement functions. This example uses a simple heuristic: it assumes that
-    // the pie chart should be at least as wide as its label.
-    //
-    @Override
-    protected int getSuggestedMinimumWidth() {
-        return (int) mTextWidth * 2;
-    }
-
-    @Override
-    protected int getSuggestedMinimumHeight() {
-        return (int) mTextWidth;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // Try for a width based on our minimum
-        int minw = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
-
-        int w = Math.max(minw, MeasureSpec.getSize(widthMeasureSpec));
-
-        // Whatever the width ends up being, ask for a height that would let the pie
-        // get as big as it can
-        int minh = (w - (int) mTextWidth) + getPaddingBottom() + getPaddingTop();
-        int h = Math.min(MeasureSpec.getSize(heightMeasureSpec), minh);
-
-        setMeasuredDimension(w, h);
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        //
-        // Set dimensions for text, pie chart, etc
-        //
-        // Account for padding
-        float xpad = (float) (getPaddingLeft() + getPaddingRight());
-        float ypad = (float) (getPaddingTop() + getPaddingBottom());
-
-        // Account for the label
-        if (mShowText) xpad += mTextWidth;
-
-        float ww = (float) w - xpad;
-        float hh = (float) h - ypad;
-
-        // Figure out how big we can make the pie.
-        float diameter = Math.min(ww, hh);
-        mPieBounds = new RectF(
-                0.0f,
-                0.0f,
-                diameter,
-                diameter);
-        mPieBounds.offsetTo(getPaddingLeft(), getPaddingTop());
-
-        mPointerY = mTextY - (mTextHeight / 2.0f);
-        float pointerOffset = mPieBounds.centerY() - mPointerY;
-
-        // Make adjustments based on text position
-        if (mTextPos == TEXTPOS_LEFT) {
-            mTextPaint.setTextAlign(Paint.Align.RIGHT);
-            if (mShowText) mPieBounds.offset(mTextWidth, 0.0f);
-            mTextX = mPieBounds.left;
-
-            if (pointerOffset < 0) {
-                pointerOffset = -pointerOffset;
-                mCurrentItemAngle = 225;
-            } else {
-                mCurrentItemAngle = 135;
-            }
-            mPointerX = mPieBounds.centerX() - pointerOffset;
-        } else {
-            mTextPaint.setTextAlign(Paint.Align.LEFT);
-            mTextX = mPieBounds.right;
-
-            if (pointerOffset < 0) {
-                pointerOffset = -pointerOffset;
-                mCurrentItemAngle = 315;
-            } else {
-                mCurrentItemAngle = 45;
-            }
-            mPointerX = mPieBounds.centerX() + pointerOffset;
-        }
-
-        mShadowBounds = new RectF(
-                mPieBounds.left + 10,
-                mPieBounds.bottom + 10,
-                mPieBounds.right - 10,
-                mPieBounds.bottom + 20);
-
-        // Lay out the child view that actually draws the pie.
-        mPieView.layout((int) mPieBounds.left,
-                (int) mPieBounds.top,
-                (int) mPieBounds.right,
-                (int) mPieBounds.bottom);
-        mPieView.setPivot(mPieBounds.width() / 2, mPieBounds.height() / 2);
-
-        mPointerView.layout(0, 0, w, h);
-        onDataChanged();
-    }
-
-    /**
-     * Calculate which pie slice is under the pointer, and set the current item
-     * field accordingly.
-     */
-    private void calcCurrentItem() {
-        int pointerAngle = (mCurrentItemAngle + 360 + mPieRotation) % 360;
-        for (int i = 0; i < mData.size(); ++i) {
-            Item it = mData.get(i);
-            if (it.mStartAngle <= pointerAngle && pointerAngle <= it.mEndAngle) {
-                if (i != mCurrentItem) {
-                    setCurrentItem(i, false);
-                }
-                break;
-            }
-        }
-    }
-
-    /**
-     * Do all of the recalculations needed when the data array changes.
-     */
-    private void onDataChanged() {
-        // When the data changes, we have to recalculate
-        // all of the angles.
-        int currentAngle = 0;
-        for (Item it : mData) {
-            it.mStartAngle = currentAngle;
-            it.mEndAngle = (int) ((float) currentAngle + it.mValue * 360.0f / mTotal);
-            currentAngle = it.mEndAngle;
-
-
-            // Recalculate the gradient shaders. There are
-            // three values in this gradient, even though only
-            // two are necessary, in order to work around
-            // a bug in certain versions of the graphics engine
-            // that expects at least three values if the
-            // positions array is non-null.
-            //
-            it.mShader = new SweepGradient(
-                    mPieBounds.width() / 2.0f,
-                    mPieBounds.height() / 2.0f,
-                    new int[]{
-                            it.mHighlight,
-                            it.mHighlight,
-                            it.mColor,
-                            it.mColor,
-                    },
-                    new float[]{
-                            0,
-                            (float) (360 - it.mEndAngle) / 360.0f,
-                            (float) (360 - it.mStartAngle) / 360.0f,
-                            1.0f
-                    }
-            );
-        }
-        calcCurrentItem();
-        onScrollFinished();
-    }
-
-    /**
-     * Initialize the control. This code is in a separate method so that it can be
-     * called from both constructors.
-     */
-    private void init() {
-        // Force the background to software rendering because otherwise the Blur
-        // filter won't work.
-        setLayerToSW(this);
-
-        // Set up the paint for the label text
-        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setColor(mTextColor);
-        if (mTextHeight == 0) {
-            mTextHeight = mTextPaint.getTextSize();
-        } else {
-            mTextPaint.setTextSize(mTextHeight);
-        }
-
-        // Set up the paint for the pie slices
-        mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPiePaint.setStyle(Paint.Style.FILL);
-        mPiePaint.setTextSize(mTextHeight);
-
-        // Set up the paint for the shadow
-        mShadowPaint = new Paint(0);
-        mShadowPaint.setColor(0xff101010);
-        mShadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));
-
-        // Add a child view to draw the pie. Putting this in a child view
-        // makes it possible to draw it on a separate hardware layer that rotates
-        // independently
-        mPieView = new PieView(getContext());
-        addView(mPieView);
-        mPieView.rotateTo(mPieRotation);
-
-        // The pointer doesn't need hardware acceleration, but in order to show up
-        // in front of the pie it also needs to be on a separate view.
-        mPointerView = new PointerView(getContext());
-        addView(mPointerView);
-
-        // Set up an animator to animate the PieRotation property. This is used to
-        // correct the pie's orientation after the user lets go of it.
-        if (Build.VERSION.SDK_INT >= 11) {
-            mAutoCenterAnimator = ObjectAnimator.ofInt(PieChart.this, "PieRotation", 0);
-
-            // Add a listener to hook the onAnimationEnd event so that we can do
-            // some cleanup when the pie stops moving.
-            mAutoCenterAnimator.addListener(new Animator.AnimatorListener() {
-                public void onAnimationStart(Animator animator) {
-                }
-
-                public void onAnimationEnd(Animator animator) {
-                    mPieView.decelerate();
-                }
-
-                public void onAnimationCancel(Animator animator) {
-                }
-
-                public void onAnimationRepeat(Animator animator) {
-                }
-            });
-        }
-
-
-        // Create a Scroller to handle the fling gesture.
-        if (Build.VERSION.SDK_INT < 11) {
-            mScroller = new Scroller(getContext());
-        } else {
-            mScroller = new Scroller(getContext(), null, true);
-        }
-        // The scroller doesn't have any built-in animation functions--it just supplies
-        // values when we ask it to. So we have to have a way to call it every frame
-        // until the fling ends. This code (ab)uses a ValueAnimator object to generate
-        // a callback on every animation frame. We don't use the animated value at all.
-        if (Build.VERSION.SDK_INT >= 11) {
-            mScrollAnimator = ValueAnimator.ofFloat(0, 1);
-            mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    tickScrollAnimation();
-                }
-            });
-        }
-
-        // Create a gesture detector to handle onTouch messages
-        mDetector = new GestureDetector(PieChart.this.getContext(), new GestureListener());
-
-        // Turn off long press--this control doesn't use it, and if long press is enabled,
-        // you can't scroll for a bit, pause, then scroll some more (the pause is interpreted
-        // as a long press, apparently)
-        mDetector.setIsLongpressEnabled(false);
-
-
-        // In edit mode it's nice to have some demo data, so add that here.
-        if (this.isInEditMode()) {
-            Resources res = getResources();
-            addItem("Annabelle", 3, res.getColor(R.color.bluegrass));
-            addItem("Brunhilde", 4, res.getColor(R.color.chartreuse));
-            addItem("Carolina", 2, res.getColor(R.color.emerald));
-            addItem("Dahlia", 3, res.getColor(R.color.seafoam));
-            addItem("Ekaterina", 1, res.getColor(R.color.slate));
-        }
-
-    }
-
-    private void tickScrollAnimation() {
-        if (!mScroller.isFinished()) {
-            mScroller.computeScrollOffset();
-            setPieRotation(mScroller.getCurrY());
-        } else {
-            if (Build.VERSION.SDK_INT >= 11) {
-                mScrollAnimator.cancel();
-            }
-            onScrollFinished();
-        }
-    }
-
-    private void setLayerToSW(View v) {
-        if (!v.isInEditMode() && Build.VERSION.SDK_INT >= 11) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
-    }
-
-    private void setLayerToHW(View v) {
-        if (!v.isInEditMode() && Build.VERSION.SDK_INT >= 11) {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        }
-    }
-
-    /**
-     * Force a stop to all pie motion. Called when the user taps during a fling.
-     */
-    private void stopScrolling() {
-        mScroller.forceFinished(true);
-        if (Build.VERSION.SDK_INT >= 11) {
-            mAutoCenterAnimator.cancel();
-        }
-
-        onScrollFinished();
-    }
-
-    /**
-     * Called when the user finishes a scroll action.
-     */
-    private void onScrollFinished() {
-        if (mAutoCenterInSlice) {
-            centerOnCurrentItem();
-        } else {
-            mPieView.decelerate();
-        }
-    }
-
-    /**
-     * Kicks off an animation that will result in the pointer being centered in the
-     * pie slice of the currently selected item.
-     */
-    private void centerOnCurrentItem() {
-        Item current = mData.get(getCurrentItem());
-        int targetAngle = current.mStartAngle + (current.mEndAngle - current.mStartAngle) / 2;
-        targetAngle -= mCurrentItemAngle;
-        if (targetAngle < 90 && mPieRotation > 180) targetAngle += 360;
-
-        if (Build.VERSION.SDK_INT >= 11) {
-            // Fancy animated version
-            mAutoCenterAnimator.setIntValues(targetAngle);
-            mAutoCenterAnimator.setDuration(AUTOCENTER_ANIM_DURATION).start();
-        } else {
-            // Dull non-animated version
-            //mPieView.rotateTo(targetAngle);
-        }
-    }
-
-    /**
-     * Internal child class that draws the pie chart onto a separate hardware layer
-     * when necessary.
-     */
-    private class PieView extends View {
-        // Used for SDK < 11
-        private float mRotation = 0;
-        private Matrix mTransform = new Matrix();
-        private PointF mPivot = new PointF();
-
-        /**
-         * Construct a PieView
-         *
-         * @param context
-         */
-        public PieView(Context context) {
-            super(context);
-        }
-
-        /**
-         * Enable hardware acceleration (consumes memory)
-         */
-        public void accelerate() {
-            setLayerToHW(this);
-        }
-
-        /**
-         * Disable hardware acceleration (releases memory)
-         */
-        public void decelerate() {
-            setLayerToSW(this);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
-            if (Build.VERSION.SDK_INT < 11) {
-                mTransform.set(canvas.getMatrix());
-                mTransform.preRotate(mRotation, mPivot.x, mPivot.y);
-                canvas.setMatrix(mTransform);
-            }
-
-            for (Item it : mData) {
-                mPiePaint.setShader(it.mShader);
-                canvas.drawArc(mBounds,
-                        360 - it.mEndAngle,
-                        it.mEndAngle - it.mStartAngle,
-                        true, mPiePaint);
-            }
-        }
-
-        @Override
-        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-            mBounds = new RectF(0, 0, w, h);
-        }
-
-        RectF mBounds;
-
-        public void rotateTo(float pieRotation) {
-            mRotation = pieRotation;
-            if (Build.VERSION.SDK_INT >= 11) {
-                setRotation(pieRotation);
-            } else {
-                invalidate();
-            }
-        }
-
-        public void setPivot(float x, float y) {
-            mPivot.x = x;
-            mPivot.y = y;
-            if (Build.VERSION.SDK_INT >= 11) {
-                setPivotX(x);
-                setPivotY(y);
-            } else {
-                invalidate();
-            }
-        }
-    }
-
-    /**
-     * View that draws the pointer on top of the pie chart
-     */
-    private class PointerView extends View {
-
-        /**
-         * Construct a PointerView object
-         *
-         * @param context
-         */
-        public PointerView(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            canvas.drawLine(mTextX, mPointerY, mPointerX, mPointerY, mTextPaint);
-            canvas.drawCircle(mPointerX, mPointerY, mPointerRadius, mTextPaint);
-        }
-    }
-
-    /**
-     * Maintains the state for a data item.
-     */
-    private class Item {
-        public String mLabel;
-        public float mValue;
-        public int mColor;
-
-        // computed values
-        public int mStartAngle;
-        public int mEndAngle;
-
-        public int mHighlight;
-        public Shader mShader;
-    }
-
-    /**
-     * Extends {@link GestureDetector.SimpleOnGestureListener} to provide custom gesture
-     * processing.
-     */
-    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            // Set the pie rotation directly.
-            float scrollTheta = vectorToScalarScroll(
-                    distanceX,
-                    distanceY,
-                    e2.getX() - mPieBounds.centerX(),
-                    e2.getY() - mPieBounds.centerY());
-            setPieRotation(getPieRotation() - (int) scrollTheta / FLING_VELOCITY_DOWNSCALE);
-            return true;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            // Set up the Scroller for a fling
-            float scrollTheta = vectorToScalarScroll(
-                    velocityX,
-                    velocityY,
-                    e2.getX() - mPieBounds.centerX(),
-                    e2.getY() - mPieBounds.centerY());
-            mScroller.fling(
-                    0,
-                    (int) getPieRotation(),
-                    0,
-                    (int) scrollTheta / FLING_VELOCITY_DOWNSCALE,
-                    0,
-                    0,
-                    Integer.MIN_VALUE,
-                    Integer.MAX_VALUE);
-
-            // Start the animator and tell it to animate for the expected duration of the fling.
-            if (Build.VERSION.SDK_INT >= 11) {
-                mScrollAnimator.setDuration(mScroller.getDuration());
-                mScrollAnimator.start();
-            }
-            return true;
-        }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            // The user is interacting with the pie, so we want to turn on acceleration
-            // so that the interaction is smooth.
-            mPieView.accelerate();
-            if (isAnimationRunning()) {
-                stopScrolling();
-            }
-            return true;
-        }
-    }
-
-    private boolean isAnimationRunning() {
-        return !mScroller.isFinished() || (Build.VERSION.SDK_INT >= 11 && mAutoCenterAnimator.isRunning());
-    }
-
-    /**
-     * Helper method for translating (x,y) scroll vectors into scalar rotation of the pie.
-     *
-     * @param dx The x component of the current scroll vector.
-     * @param dy The y component of the current scroll vector.
-     * @param x  The x position of the current touch, relative to the pie center.
-     * @param y  The y position of the current touch, relative to the pie center.
-     * @return The scalar representing the change in angular position for this scroll.
-     */
-    private static float vectorToScalarScroll(float dx, float dy, float x, float y) {
-        // get the length of the vector
-        float l = (float) Math.sqrt(dx * dx + dy * dy);
-
-        // decide if the scalar should be negative or positive by finding
-        // the dot product of the vector perpendicular to (x,y). 
-        float crossX = -y;
-        float crossY = x;
-
-        float dot = (crossX * dx + crossY * dy);
-        float sign = Math.signum(dot);
-
-        return l * sign;
-    }
-
 
 }
