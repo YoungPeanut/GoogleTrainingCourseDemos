@@ -97,6 +97,7 @@
 
     <!-- Animations-->
     <string name="l_activity_animations">Building Apps with Graphics Animation/Animations</string>
+    <string name="l_activity_harvic880925">Building Apps with Graphics Animation/harvic880925</string>
 
     <!-- Titles -->
     <string name="title_crossfade">Simple Crossfade</string>
@@ -314,7 +315,6 @@
     <string name="doodle_alert">Doodle Alert</string>
     <string name="doodle_found">There is a Google doodle today!!</string>
     <string name="no_doodle">No Google doodle today.</string>
-
 
 
 </resources>
