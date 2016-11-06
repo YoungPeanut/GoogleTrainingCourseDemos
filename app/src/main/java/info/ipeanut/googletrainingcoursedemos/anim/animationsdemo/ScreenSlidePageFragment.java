@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package info.ipeanut.googletrainingcoursedemos.animationsdemo;
+package info.ipeanut.googletrainingcoursedemos.anim.animationsdemo;
 
 import android.app.Fragment;
 import android.os.Bundle;

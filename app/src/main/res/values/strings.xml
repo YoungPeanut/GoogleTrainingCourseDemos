@@ -98,6 +98,7 @@
     <!-- Animations-->
     <string name="l_activity_animations">Building Apps with Graphics Animation/Animations</string>
     <string name="l_activity_harvic880925">Building Apps with Graphics Animation/harvic880925</string>
+    <string name="l_activity_anim_drawable">Building Apps with Graphics Animation/animated-vector</string>
 
     <!-- Titles -->
     <string name="title_crossfade">Simple Crossfade</string>
