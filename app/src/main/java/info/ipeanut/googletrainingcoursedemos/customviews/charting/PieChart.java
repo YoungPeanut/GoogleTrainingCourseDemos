@@ -52,7 +52,6 @@ public class PieChart extends ViewGroup {
 
     private RectF mPieBounds = new RectF();
 
-    private Paint mPiePaint;
     private Paint mTextPaint;
     private Paint mShadowPaint;
 
@@ -199,10 +198,6 @@ public class PieChart extends ViewGroup {
             mTextPaint.setTextSize(mTextHeight);
         }
 
-        // Set up the paint for the pie slices
-        mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPiePaint.setStyle(Paint.Style.FILL);
-        mPiePaint.setTextSize(mTextHeight);
 
         // Set up the paint for the shadow
         mShadowPaint = new Paint(0);// TODO: 16/9/8 0是个什么鬼。。。
@@ -212,7 +207,7 @@ public class PieChart extends ViewGroup {
         // Add a child view to draw the pie. Putting this in a child view
         // makes it possible to draw it on a separate hardware layer that rotates
         // independently
-        mPieView = new PieView(getContext());
+        mPieView = new PieView(getContext(),mTextHeight);
         addView(mPieView);
         mPieView.rotateTo(mPieRotation);// hardware layer  独立旋转
 
@@ -233,7 +228,7 @@ public class PieChart extends ViewGroup {
                 }
 
                 public void onAnimationEnd(Animator animator) {
-                    mPieView.decelerate();
+                    setLayerToSW(mPieView);
                 }
 
                 public void onAnimationCancel(Animator animator) {
@@ -440,6 +435,7 @@ public class PieChart extends ViewGroup {
     private void onDataChanged() {
         // When the data changes, we have to recalculate
         // all of the angles.
+        mPieView.setData(mData);
         int currentAngle = 0;
         for (Item it : mData) {
             it.mStartAngle = currentAngle;
@@ -538,7 +534,8 @@ public class PieChart extends ViewGroup {
         if (mAutoCenterInSlice) {
             centerOnCurrentItem();
         } else {
-            mPieView.decelerate();
+            setLayerToSW(mPieView);
+
         }
     }
 
@@ -629,7 +626,7 @@ public class PieChart extends ViewGroup {
         public boolean onDown(MotionEvent e) {
             // The user is interacting with the pie, so we want to turn on acceleration
             // so that the interaction is smooth.
-            mPieView.accelerate();
+            setLayerToHW(mPieView);
             if (isAnimationRunning()) {
                 stopScrolling();
             }
@@ -668,92 +665,6 @@ public class PieChart extends ViewGroup {
     /**********************************面向对象产生的对象类**************************************************/
 
     /**
-     * Internal child class that draws the pie chart onto a separate hardware layer
-     * when necessary.
-     */
-    private class PieView extends View {
-        // Used for SDK < 11
-        private float mRotation = 0;
-        private Matrix mTransform = new Matrix();
-        private PointF mPivot = new PointF();
-
-        /**
-         * Construct a PieView
-         *
-         * @param context
-         */
-        public PieView(Context context) {
-            super(context);
-        }
-
-        /**
-         * Enable hardware acceleration (consumes memory)
-         */
-        public void accelerate() {
-            setLayerToHW(this);
-        }
-
-        /**
-         * Disable hardware acceleration (releases memory)
-         */
-        public void decelerate() {
-            setLayerToSW(this);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
-            // 为了SDK_INT < 11的旋转，rotateTo
-            // 通过 Matrix 操作 canvas
-            if (Build.VERSION.SDK_INT < 11) {
-                mTransform.set(canvas.getMatrix());
-                mTransform.preRotate(mRotation, mPivot.x, mPivot.y);
-                canvas.setMatrix(mTransform);
-            }
-
-            for (Item it : mData) {
-                mPiePaint.setShader(it.mShader);//颜色渐变的着色器
-                canvas.drawArc(mBounds,
-                        360 - it.mEndAngle,//0度是钟表3点方向，起始角度默认顺时针，被360减，说明它是逆时针画的，
-                        it.mEndAngle - it.mStartAngle,
-                        true, //true表示 弧线与圆点连接闭合
-                        mPiePaint);//mPiePaint 是填充的
-            }
-        }
-
-        /**
-         * 这是一个神奇的回调方法啊，这样就拿到了mBounds，。。。太便宜了
-         */
-        @Override
-        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-            mBounds = new RectF(0, 0, w, h);
-        }
-
-        RectF mBounds;
-
-        public void rotateTo(float pieRotation) {
-            mRotation = pieRotation;
-            if (Build.VERSION.SDK_INT >= 11) {
-                setRotation(pieRotation);
-            } else {
-                invalidate();
-            }
-        }
-
-        public void setPivot(float x, float y) {
-            mPivot.x = x;
-            mPivot.y = y;
-            if (Build.VERSION.SDK_INT >= 11) {
-                setPivotX(x);
-                setPivotY(y);
-            } else {
-                invalidate();
-            }
-        }
-    }
-
-    /**
      * View that draws the pointer on top of the pie chart
      */
     private class PointerView extends View {
@@ -772,22 +683,6 @@ public class PieChart extends ViewGroup {
             canvas.drawLine(mTextX, mPointerY, mPointerX, mPointerY, mTextPaint);
             canvas.drawCircle(mPointerX, mPointerY, mPointerRadius, mTextPaint);
         }
-    }
-
-    /**
-     * Maintains the state for a data item.
-     */
-    private class Item {
-        public String mLabel;
-        public float mValue;
-        public int mColor;
-
-        // computed values
-        public int mStartAngle;
-        public int mEndAngle;
-
-        public int mHighlight;
-        public Shader mShader;
     }
 
     /**********************************对外**************************************************/

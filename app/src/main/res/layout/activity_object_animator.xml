@@ -40,4 +40,12 @@
 
         />
 
+    <info.ipeanut.googletrainingcoursedemos.anim.harvic880925.MyPointView
+        android:id="@+id/mypointview"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"
+        />
+
 </LinearLayout>

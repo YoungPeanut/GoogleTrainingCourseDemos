@@ -13,49 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.ipeanut.googletrainingcoursedemos.opengl10;
+package info.ipeanut.googletrainingcoursedemos.opengl.opengl10;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * A two-dimensional triangle for use as a drawn object in OpenGL ES 1.0/1.1.
+ * A two-dimensional square for use as a drawn object in OpenGL ES 1.0/1.1.
  */
-public class Triangle {
+public class Square {
 
     private final FloatBuffer vertexBuffer;
+    private final ShortBuffer drawListBuffer;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
-    static float triangleCoords[] = {
-            // in counterclockwise order:
-            0.0f,  0.622008459f, 0.0f,// top
-           -0.5f, -0.311004243f, 0.0f,// bottom left
-            0.5f, -0.311004243f, 0.0f // bottom right
-    };
+    static float squareCoords[] = {
+            -0.5f,  0.5f, 0.0f,   // top left
+            -0.5f, -0.5f, 0.0f,   // bottom left
+             0.5f, -0.5f, 0.0f,   // bottom right
+             0.5f,  0.5f, 0.0f }; // top right
 
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
+    private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+
+    float color[] = { 0.2f, 0.709803922f, 0.898039216f, 1.0f };
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
      */
-    public Triangle() {
+    public Square() {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
-                // (number of coordinate values * 4 bytes per float)
-                triangleCoords.length * 4);
-        // use the device hardware's native byte order
+        // (# of coordinate values * 4 bytes per float)
+                squareCoords.length * 4);
         bb.order(ByteOrder.nativeOrder());
-
-        // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
-        // add the coordinates to the FloatBuffer
-        vertexBuffer.put(triangleCoords);
-        // set the buffer to read the first coordinate
+        vertexBuffer.put(squareCoords);
         vertexBuffer.position(0);
+
+        // initialize byte buffer for the draw list
+        ByteBuffer dlb = ByteBuffer.allocateDirect(
+                // (# of coordinate values * 2 bytes per short)
+                drawOrder.length * 2);
+        dlb.order(ByteOrder.nativeOrder());
+        drawListBuffer = dlb.asShortBuffer();
+        drawListBuffer.put(drawOrder);
+        drawListBuffer.position(0);
     }
 
     /**
@@ -68,15 +75,16 @@ public class Triangle {
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 
         // draw the shape
-        gl.glColor4f(       // set color:
+        gl.glColor4f(       // set color
                 color[0], color[1],
                 color[2], color[3]);
         gl.glVertexPointer( // point to vertex data:
                 COORDS_PER_VERTEX,
                 GL10.GL_FLOAT, 0, vertexBuffer);
-        gl.glDrawArrays(    // draw shape:
-                GL10.GL_TRIANGLES, 0,
-                triangleCoords.length / COORDS_PER_VERTEX);
+        gl.glDrawElements(  // draw shape:
+                GL10.GL_TRIANGLES,
+                drawOrder.length, GL10.GL_UNSIGNED_SHORT,
+                drawListBuffer);
 
         // Disable vertex array drawing to avoid
         // conflicts with shapes that don't use it

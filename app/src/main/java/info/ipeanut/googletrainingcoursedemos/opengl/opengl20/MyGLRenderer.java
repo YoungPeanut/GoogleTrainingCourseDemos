@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.ipeanut.googletrainingcoursedemos.opengl20;
+package info.ipeanut.googletrainingcoursedemos.opengl.opengl20;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;

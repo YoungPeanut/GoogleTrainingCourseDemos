@@ -118,7 +118,7 @@
 
         <!-- HelloOpenGLES10 -->
         <activity
-            android:name=".opengl10.OpenGLES10Activity"
+            android:name=".opengl.opengl10.OpenGLES10Activity"
             android:configChanges="orientation|screenSize"
             android:label="@string/l_activity_helloopengles10">
             <intent-filter>
@@ -130,7 +130,7 @@
 
         <!-- HelloOpenGLES20 -->
         <activity
-            android:name=".opengl20.OpenGLES20Activity"
+            android:name=".opengl.opengl20.OpenGLES20Activity"
             android:configChanges="orientation|screenSize"
             android:label="@string/l_activity_helloopengles20">
             <intent-filter>
