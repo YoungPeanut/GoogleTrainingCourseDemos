@@ -64,5 +64,10 @@ limitations under the License.
         <attr name="android:spacing"/>
     </declare-styleable>
 
+    <declare-styleable name="CircleImageView1">
+        <attr name="drawBorder" format="boolean" />
+        <attr name="borderColor" format="color" />
+        <attr name="borderWidth" format="dimension" />
+    </declare-styleable>
 
 </resources>
