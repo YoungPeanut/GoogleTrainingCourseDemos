@@ -17,12 +17,17 @@ import android.widget.ImageView;
 import info.ipeanut.googletrainingcoursedemos.R;
 
 /**
+ * Paint.setXfermode
+ *
  * D for Destination, S for Source
  *
  * mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
  * http://blog.csdn.net/harvic880925/article/details/51264653
  *
  * Created by chenshao on 16/11/16.
+ *
+ * https://github.com/MostafaGazar/CustomShapeImageView
+ *
  */
 public class CircleImageView1 extends ImageView {
 

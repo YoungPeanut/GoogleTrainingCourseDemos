@@ -56,6 +56,16 @@
 
         />
 
+    <info.ipeanut.googletrainingcoursedemos.customviews.imageview.CircleImageView3
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/image1"
+        custom:drawBorder="true"
+        custom:borderWidth="3dp"
+        custom:borderColor="@color/color_scheme_1_3"
+
+        />
+
 
 </LinearLayout>
 
