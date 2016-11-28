@@ -46,6 +46,13 @@
             android:text="@string/reset_button"
             />
 
+    <Button
+            android:id="@+id/TelescopeView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TelescopeView"
+            />
+
     <info.ipeanut.googletrainingcoursedemos.customviews.imageview.CircleImageView1
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -65,7 +72,6 @@
         custom:borderColor="@color/color_scheme_1_3"
 
         />
-
 
 </LinearLayout>
 

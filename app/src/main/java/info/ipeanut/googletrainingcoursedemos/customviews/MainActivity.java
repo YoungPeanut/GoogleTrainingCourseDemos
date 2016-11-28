@@ -16,6 +16,7 @@
 package info.ipeanut.googletrainingcoursedemos.customviews;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.widget.Button;
 
 import info.ipeanut.googletrainingcoursedemos.R;
 import info.ipeanut.googletrainingcoursedemos.customviews.charting.PieChart;
+import info.ipeanut.googletrainingcoursedemos.customviews.harvic880925.TelescopeActivity;
 
 public class MainActivity extends Activity {
     /**
@@ -46,6 +48,11 @@ public class MainActivity extends Activity {
         ((Button) findViewById(R.id.Reset)).setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 pie.setCurrentItem(0);
+            }
+        });
+        ((Button) findViewById(R.id.TelescopeView)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, TelescopeActivity.class));
             }
         });
     }
